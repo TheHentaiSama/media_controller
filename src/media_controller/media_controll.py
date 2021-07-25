@@ -1,19 +1,17 @@
 import cv2
 import time
 from . import HandTrackingModule as htm
-import win32api
-from win32con import VK_MEDIA_PLAY_PAUSE, KEYEVENTF_EXTENDEDKEY
+from pynput.keyboard import Key, Controller
 
 
 #TODO: add a keyboard interruption such as escape 
-def play_button(display: bool) -> None:
-
+def play_button(display: bool) -> None:    
 
     ################################
     wCam, hCam = 640, 480
     #wCam, hCam = 1920, 1080
     ################################
-    
+
     cap = cv2.VideoCapture(0)
     if not cap.isOpened():
         print("Cannot open camera")
@@ -24,7 +22,8 @@ def play_button(display: bool) -> None:
     pTime = 0
     
     detector = htm.handDetector(maxHands=1, detectionCon=0.8, trackCon=0.7)
-    
+    keyboard = Controller()    
+
     while True:
         success, img = cap.read()
         if not success:
@@ -36,7 +35,8 @@ def play_button(display: bool) -> None:
             fingers = detector.fingersUp()
             
             if fingers[2] and fingers[1] and not fingers[0] and not fingers[3] and not fingers[4]:
-                win32api.keybd_event(VK_MEDIA_PLAY_PAUSE, 0, KEYEVENTF_EXTENDEDKEY, 0)
+                keyboard.press(Key.media_play_pause)
+                keyboard.release(Key.media_play_pause)
                 time.sleep(1)
     
 
