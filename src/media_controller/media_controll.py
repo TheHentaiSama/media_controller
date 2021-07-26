@@ -4,12 +4,31 @@ from . import HandTrackingModule as htm
 from pynput.keyboard import Key, Controller
 
 
-#TODO: add a keyboard interruption such as escape 
-def play_button(display: bool) -> None:    
+def media_play_pause(*args, **kwargs):
+    """Takes the array of fingers up and a keyboard object
+       and uses the media button play/pause if the index
+       and middle finger of the right hand are up.
+    """
+    fingers = kwargs['fingers']
+    keyboard = kwargs['keyboard']
+    if fingers[2] and fingers[1] and not fingers[0] and not fingers[3] and not fingers[4]:
+        keyboard.press(Key.media_play_pause)
+        keyboard.release(Key.media_play_pause)
+        time.sleep(1)
 
+
+#TODO: add a keyboard interruption such as escape 
+def main(display: bool) -> None:    
+    """Main function that processes the webcam input and
+    then calls functions to apply depending on this input.
+
+    Args:
+        display (bool): Whether to prompt a video feedback or not.
+    """
     ################################
     wCam, hCam = 640, 480
     #wCam, hCam = 1920, 1080
+    functions= [media_play_pause]
     ################################
 
     cap = cv2.VideoCapture(0)
@@ -33,12 +52,9 @@ def play_button(display: bool) -> None:
         lmList,_ = detector.findPosition(img, draw=False)
         if len(lmList) != 0:
             fingers = detector.fingersUp()
-            
-            if fingers[2] and fingers[1] and not fingers[0] and not fingers[3] and not fingers[4]:
-                keyboard.press(Key.media_play_pause)
-                keyboard.release(Key.media_play_pause)
-                time.sleep(1)
-    
+
+            for func in functions:
+                func(fingers=fingers, keyboard=keyboard)            
 
         if display:   
             cTime = time.time()
